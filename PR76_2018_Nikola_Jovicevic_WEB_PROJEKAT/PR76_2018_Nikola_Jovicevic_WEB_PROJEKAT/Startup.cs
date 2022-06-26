@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration;
+using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT
 {
     public class Startup
     {
+        private readonly string _cors = "cors";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -51,11 +53,17 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT
             {
                 mc.AddProfile(new MappingProfile());
             });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
+            services.AddScoped<IUser, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors("AnyOrigin");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

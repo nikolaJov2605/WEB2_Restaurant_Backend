@@ -24,5 +24,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             await _userService.Register(userDTO);
             return Ok();
         }
+
     }
 }

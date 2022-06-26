@@ -15,11 +15,11 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT
         private readonly IMapper _mapper;
         private readonly RestaurantDbContext _dbContext;
 
-        public UserService(IConfigurationSection secretKey, IMapper mapper, RestaurantDbContext dbContext)
+        public UserService(IMapper mapper, RestaurantDbContext dbContext, IConfiguration config)
         {
-            _secretKey = secretKey;
             _mapper = mapper;
             _dbContext = dbContext;
+            _secretKey = config.GetSection("SecretKey");
         }
 
         public Task<TokenDTO> Login(UserLoginDTO userLogin)
