@@ -11,6 +11,8 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration
     public class RestaurantDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
+        public DbSet<Food> Food { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
         public RestaurantDbContext(DbContextOptions options) : base(options)
         {
 

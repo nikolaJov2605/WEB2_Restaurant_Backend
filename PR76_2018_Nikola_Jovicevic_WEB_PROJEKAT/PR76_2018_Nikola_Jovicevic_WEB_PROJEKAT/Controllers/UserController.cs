@@ -25,5 +25,16 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok();
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginDTO userLoginDTO)
+        {
+            var token = await _userService.Login(userLoginDTO);
+            if (token == null)
+            {
+                return NotFound();
+            }
+            return Ok(token);
+        }
+
     }
 }
