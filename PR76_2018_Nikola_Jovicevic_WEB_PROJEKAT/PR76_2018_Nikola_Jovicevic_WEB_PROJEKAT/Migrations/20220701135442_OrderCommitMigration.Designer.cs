@@ -3,21 +3,38 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration;
 
 namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    partial class RestaurantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220701135442_OrderCommitMigration")]
+    partial class OrderCommitMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.0");
+
+            modelBuilder.Entity("FoodIngredient", b =>
+                {
+                    b.Property<int>("FoodId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IngredientsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FoodId", "IngredientsId");
+
+                    b.HasIndex("IngredientsId");
+
+                    b.ToTable("FoodIngredient");
+                });
 
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
                 {
@@ -55,15 +72,10 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<int?>("FoodId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FoodId");
 
                     b.ToTable("Ingredients");
                 });
@@ -89,9 +101,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 
                     b.Property<int>("DelivererId")
                         .HasColumnType("int");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
 
                     b.Property<string>("UserEmail")
                         .HasColumnType("nvarchar(max)");
@@ -146,23 +155,26 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("FoodIngredient", b =>
+                {
+                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", null)
+                        .WithMany()
+                        .HasForeignKey("FoodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Ingredient", null)
+                        .WithMany()
+                        .HasForeignKey("IngredientsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
                 {
                     b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", null)
                         .WithMany("OrderedFood")
                         .HasForeignKey("OrderId");
-                });
-
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Ingredient", b =>
-                {
-                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", null)
-                        .WithMany("Ingredients")
-                        .HasForeignKey("FoodId");
-                });
-
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
-                {
-                    b.Navigation("Ingredients");
                 });
 
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", b =>

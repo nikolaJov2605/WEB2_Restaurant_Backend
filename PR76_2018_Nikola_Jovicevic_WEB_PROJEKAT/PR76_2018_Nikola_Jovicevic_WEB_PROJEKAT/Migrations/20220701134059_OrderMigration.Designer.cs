@@ -3,21 +3,38 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration;
 
 namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    partial class RestaurantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220701134059_OrderMigration")]
+    partial class OrderMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.0");
+
+            modelBuilder.Entity("FoodIngredient", b =>
+                {
+                    b.Property<int>("FoodId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IngredientsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FoodId", "IngredientsId");
+
+                    b.HasIndex("IngredientsId");
+
+                    b.ToTable("FoodIngredient");
+                });
 
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
                 {
@@ -28,9 +45,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
@@ -43,8 +57,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
-
                     b.ToTable("Food");
                 });
 
@@ -55,50 +67,12 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<int?>("FoodId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FoodId");
-
                     b.ToTable("Ingredients");
-                });
-
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<bool>("Accepted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DelivererEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DelivererId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
-
-                    b.Property<string>("UserEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.User", b =>
@@ -146,28 +120,19 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
-                {
-                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", null)
-                        .WithMany("OrderedFood")
-                        .HasForeignKey("OrderId");
-                });
-
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Ingredient", b =>
+            modelBuilder.Entity("FoodIngredient", b =>
                 {
                     b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", null)
-                        .WithMany("Ingredients")
-                        .HasForeignKey("FoodId");
-                });
+                        .WithMany()
+                        .HasForeignKey("FoodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
-                {
-                    b.Navigation("Ingredients");
-                });
-
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", b =>
-                {
-                    b.Navigation("OrderedFood");
+                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Ingredient", null)
+                        .WithMany()
+                        .HasForeignKey("IngredientsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

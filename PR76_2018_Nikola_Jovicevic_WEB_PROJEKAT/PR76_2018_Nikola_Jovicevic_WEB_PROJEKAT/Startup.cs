@@ -115,6 +115,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT
 
             services.AddScoped<IUser, UserService>();
             services.AddScoped<IFood, FoodService>();
+            services.AddScoped<IOrder, OrderService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

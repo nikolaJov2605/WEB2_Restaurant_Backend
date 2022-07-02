@@ -11,6 +11,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT
             CreateMap<User, UserDTO>().ReverseMap();
             CreateMap<Food, FoodDTO>().ReverseMap();
             CreateMap<Ingredient, IngredientDTO>().ReverseMap();
+            CreateMap<Order, OrderDTO>().ReverseMap();
         }
     }
 }
