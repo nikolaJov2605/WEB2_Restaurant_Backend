@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models
 {
@@ -13,6 +14,10 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models
         public bool Accepted { get; set; }
         public int DelivererId { get; set; }
         public string DelivererEmail { get; set; }
-        public List<Food> OrderedFood { get; set; }
+        public DateTime TimePosted { get; set; }
+        public DateTime? TimeAccepted { get; set; }
+        public DateTime? TimeDelivered { get; set; }
+        public bool Delivered { get; set; }
+        // public List<Food> OrderedFood { get; set; }
     }
 }

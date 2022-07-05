@@ -21,19 +21,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             this._orderService = orderService;
         }
 
-        // GET: api/<OrderController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/<OrderController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
 
         // POST api/<OrderController>
         [HttpPost("create-order")]
@@ -44,16 +31,13 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok();
         }
 
-        // PUT api/<OrderController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpGet("{email}")]
+        [Authorize(Roles = "customer")]
+        public async Task<ActionResult> GetFood(string email)
         {
+            List<OrderDTO> retOrders = await _orderService.GetOrdersForUser(email);
+            return Ok(retOrders);
         }
 
-        // DELETE api/<OrderController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }

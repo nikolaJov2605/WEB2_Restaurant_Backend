@@ -10,8 +10,8 @@ using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration;
 namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    [Migration("20220701134059_OrderMigration")]
-    partial class OrderMigration
+    [Migration("20220705202728_unitedMigration")]
+    partial class unitedMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,21 +20,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                 .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.0");
-
-            modelBuilder.Entity("FoodIngredient", b =>
-                {
-                    b.Property<int>("FoodId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IngredientsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("FoodId", "IngredientsId");
-
-                    b.HasIndex("IngredientsId");
-
-                    b.ToTable("FoodIngredient");
-                });
 
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
                 {
@@ -60,6 +45,34 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.ToTable("Food");
                 });
 
+            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.FoodOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("FoodAmount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FoodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Ingredients")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FoodId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("FoodOrder");
+                });
+
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Ingredient", b =>
                 {
                     b.Property<int>("Id")
@@ -73,6 +86,51 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Ingredients");
+                });
+
+            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<bool>("Accepted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Delivered")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("DelivererEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DelivererId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("TimeAccepted")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("TimeDelivered")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TimePosted")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.User", b =>
@@ -120,19 +178,19 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("FoodIngredient", b =>
+            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.FoodOrder", b =>
                 {
-                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", null)
+                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", "Food")
                         .WithMany()
-                        .HasForeignKey("FoodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FoodId");
 
-                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Ingredient", null)
+                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", "Order")
                         .WithMany()
-                        .HasForeignKey("IngredientsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderId");
+
+                    b.Navigation("Food");
+
+                    b.Navigation("Order");
                 });
 #pragma warning restore 612, 618
         }

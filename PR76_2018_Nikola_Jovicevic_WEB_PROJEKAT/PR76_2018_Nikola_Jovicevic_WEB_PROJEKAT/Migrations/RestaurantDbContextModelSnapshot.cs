@@ -29,9 +29,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
@@ -43,9 +40,35 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 
                     b.HasKey("Id");
 
+                    b.ToTable("Food");
+                });
+
+            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.FoodOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("FoodAmount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FoodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Ingredients")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FoodId");
+
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Food");
+                    b.ToTable("FoodOrder");
                 });
 
             modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Ingredient", b =>
@@ -55,15 +78,10 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<int?>("FoodId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FoodId");
 
                     b.ToTable("Ingredients");
                 });
@@ -84,6 +102,9 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Delivered")
+                        .HasColumnType("bit");
+
                     b.Property<string>("DelivererEmail")
                         .HasColumnType("nvarchar(max)");
 
@@ -92,6 +113,15 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
+
+                    b.Property<DateTime?>("TimeAccepted")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("TimeDelivered")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TimePosted")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserEmail")
                         .HasColumnType("nvarchar(max)");
@@ -146,28 +176,19 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
+            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.FoodOrder", b =>
                 {
-                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", null)
-                        .WithMany("OrderedFood")
-                        .HasForeignKey("OrderId");
-                });
-
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Ingredient", b =>
-                {
-                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", null)
-                        .WithMany("Ingredients")
+                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", "Food")
+                        .WithMany()
                         .HasForeignKey("FoodId");
-                });
 
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Food", b =>
-                {
-                    b.Navigation("Ingredients");
-                });
+                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId");
 
-            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", b =>
-                {
-                    b.Navigation("OrderedFood");
+                    b.Navigation("Food");
+
+                    b.Navigation("Order");
                 });
 #pragma warning restore 612, 618
         }

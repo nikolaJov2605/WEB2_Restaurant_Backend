@@ -29,31 +29,44 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
         public async Task AnounceOrder(OrderDTO orderDto)
         {
             Order order = _mapper.Map<Order>(orderDto);
-            order.OrderedFood.Clear();
-            List<Food> orderedFood = _mapper.Map<List<Food>>(order.OrderedFood);
 
+            List<FoodOrder> toAdd = new List<FoodOrder>();
             double price = 0;
             foreach (var food in orderDto.OrderedFood)
             {
+                FoodOrder foodOrder = new FoodOrder();
                 if (food.Ingredients == null)
                     food.Ingredients = new List<IngredientDTO>();
 
                 var foodQuery = _dbContext.Food.SingleOrDefault(x => x.Name == food.Name && x.Quantity == food.Quantity);
-                if(foodQuery != null)
+                if(foodQuery == null)
                 {
-                    foodQuery.Ingredients = new List<Ingredient>();
+                    return;
+                 //   foodQuery.Ingredients = new List<Ingredient>();
                 }
-                
+
+                string ingredients = "";
                 foreach(var ingredient in food.Ingredients)
                 {
                     var ingredientQuery = _dbContext.Ingredients.SingleOrDefault(x => x.Name == ingredient.Name);
                     if(ingredientQuery != null)
                     {
-                        foodQuery.Ingredients.Add(ingredientQuery);
+                        if(ingredients == "")
+                        {
+                            ingredients = ingredientQuery.Name;
+                        }
+                        else
+                        {
+                            ingredients += (", " + ingredientQuery.Name);
+                        }
                     }
                 }
+                foodOrder.Order = order;
+                foodOrder.Food = foodQuery;
+                foodOrder.Ingredients = ingredients;
+                foodOrder.FoodAmount = food.Amount;
 
-                order.OrderedFood.Add(foodQuery);
+                toAdd.Add(foodOrder);
 
                 price += (food.Price * food.Amount);
             }
@@ -61,38 +74,52 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             price += double.Parse(_deliveryFee.Value);  // dodavanje troskova isporuke na cenu
 
             order.Price = price;
+            order.TimePosted = DateTime.Now;
+            order.TimeAccepted = null;
+            order.TimeDelivered = null;
 
             try
             {
                 _dbContext.Orders.Add(order);
+                _dbContext.FoodOrder.AddRange(toAdd);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
+        }
 
-            /*foreach (var food in orderedFood)
+        public async Task<List<OrderDTO>> GetOrdersForUser(string email)
+        {
+            List<Order> orders = await _dbContext.Orders.Where(x => x.UserEmail == email).ToListAsync();
+            List<OrderDTO> retList = new List<OrderDTO>();
+            List<FoodOrder> foodOrder = new List<FoodOrder>();
+            foreach (var order in orders)
             {
-                List<Ingredient> ingredients = _mapper.Map<List<Ingredient>>(food.Ingredients);
-            }*/
-            /*Order order = _mapper.Map<Order>(orderDto);
-            double price = 0;
-            foreach(var food in orderDto.OrderedFood)
-            {
-                _dbContext.Ingredients.SingleOrDefault(x=>x.Name == food.in)
-                price += (food.Price * food.Amount);
+                List<FoodOrder> temp = _dbContext.FoodOrder.Include(x=>x.Food).Where(x => x.Order.Id == order.Id).ToList();
+                OrderDTO orderDto = _mapper.Map<OrderDTO>(order);
+                orderDto.OrderedFood = new List<FoodDTO>();
+                foreach (var fo in temp)
+                {
+                    FoodDTO foodDTO = new FoodDTO();
+                    Food food = _dbContext.Food.FirstOrDefault(x => x.Id == fo.Food.Id);
+                    if (food == null)
+                        break;
+                    foodDTO = _mapper.Map<FoodDTO>(food);
+                    foodDTO.Ingredients = new List<IngredientDTO>();
+                    string[] strArr = fo.Ingredients.Split(", ");
+                    foreach(var s in strArr)
+                    {
+                        foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
+                    }
+                    foodDTO.Amount = fo.FoodAmount;
+                    orderDto.OrderedFood.Add(foodDTO);
+                }
+                retList.Add(orderDto);
             }
-            price += double.Parse(_deliveryFee.Value);
-            try
-            {
-                _dbContext.Orders.Add(order);
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }*/
+
+            return retList;
         }
     }
 }

@@ -14,6 +14,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration
         public DbSet<Food> Food { get; set; }
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<FoodOrder> FoodOrder { get; set; }
         public RestaurantDbContext(DbContextOptions options) : base(options)
         {
 

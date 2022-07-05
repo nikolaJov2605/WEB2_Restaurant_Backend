@@ -6,6 +6,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        //public List<FoodOrder> FoodOrder { get; set; }
         //public List<Food> Food { get; set; }
     }
 }

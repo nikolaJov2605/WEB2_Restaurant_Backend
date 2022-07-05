@@ -30,7 +30,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
         {
             try
             {
-                List<Food> retList = await _dbContext.Food.Include(x => x.Ingredients).ToListAsync();
+                List<Food> retList = await _dbContext.Food.ToListAsync();
                 return _mapper.Map<List<FoodDTO>>(retList);
             }
             catch(Exception e)
