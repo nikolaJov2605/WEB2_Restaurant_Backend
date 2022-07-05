@@ -94,7 +94,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
         {
             List<Order> orders = await _dbContext.Orders.Where(x => x.UserEmail == email).ToListAsync();
             List<OrderDTO> retList = new List<OrderDTO>();
-            List<FoodOrder> foodOrder = new List<FoodOrder>();
             foreach (var order in orders)
             {
                 List<FoodOrder> temp = _dbContext.FoodOrder.Include(x=>x.Food).Where(x => x.Order.Id == order.Id).ToList();
@@ -110,6 +109,37 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                     foodDTO.Ingredients = new List<IngredientDTO>();
                     string[] strArr = fo.Ingredients.Split(", ");
                     foreach(var s in strArr)
+                    {
+                        foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
+                    }
+                    foodDTO.Amount = fo.FoodAmount;
+                    orderDto.OrderedFood.Add(foodDTO);
+                }
+                retList.Add(orderDto);
+            }
+
+            return retList;
+        }
+
+        public async Task<List<OrderDTO>> GetUndeliveredOrders(string email)
+        {
+            List<Order> orders = await _dbContext.Orders.Where(x => x.UserEmail == email && x.Delivered == false).ToListAsync();
+            List<OrderDTO> retList = new List<OrderDTO>();
+            foreach (var order in orders)
+            {
+                List<FoodOrder> temp = _dbContext.FoodOrder.Include(x => x.Food).Where(x => x.Order.Id == order.Id).ToList();
+                OrderDTO orderDto = _mapper.Map<OrderDTO>(order);
+                orderDto.OrderedFood = new List<FoodDTO>();
+                foreach (var fo in temp)
+                {
+                    FoodDTO foodDTO = new FoodDTO();
+                    Food food = _dbContext.Food.FirstOrDefault(x => x.Id == fo.Food.Id);
+                    if (food == null)
+                        break;
+                    foodDTO = _mapper.Map<FoodDTO>(food);
+                    foodDTO.Ingredients = new List<IngredientDTO>();
+                    string[] strArr = fo.Ingredients.Split(", ");
+                    foreach (var s in strArr)
                     {
                         foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
                     }

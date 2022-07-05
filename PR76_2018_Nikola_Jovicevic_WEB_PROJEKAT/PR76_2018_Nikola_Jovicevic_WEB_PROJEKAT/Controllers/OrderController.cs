@@ -33,9 +33,25 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
 
         [HttpGet("{email}")]
         [Authorize(Roles = "customer")]
-        public async Task<ActionResult> GetFood(string email)
+        public async Task<ActionResult> GetOrdersForUser(string email)
         {
             List<OrderDTO> retOrders = await _orderService.GetOrdersForUser(email);
+            if (retOrders == null)
+            {
+                return NotFound();
+            }
+            return Ok(retOrders);
+        }
+
+        [HttpGet("current-orders/{email}")]
+        [Authorize(Roles = "customer")]
+        public async Task<ActionResult> GetUndeliveredOrders(string email)
+        {
+            List<OrderDTO> retOrders = await _orderService.GetUndeliveredOrders(email);
+            if(retOrders == null)
+            {
+                return NotFound();
+            }
             return Ok(retOrders);
         }
 
