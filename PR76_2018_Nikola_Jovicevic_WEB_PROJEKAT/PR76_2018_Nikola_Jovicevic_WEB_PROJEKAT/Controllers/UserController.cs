@@ -36,6 +36,23 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok(token);
         }
 
+        [HttpGet("{username}")]
+        public async Task<ActionResult> GetUserByUsername(string username)
+        {
+            UserDTO retUser = await _userService.GetUserByUsername(username);
+            if(retUser == null)
+            {
+                return NotFound();
+            }
+            return Ok(retUser);
+        }
+
+        [HttpPost("update-user")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserDTO userDTO)
+        {
+            await _userService.UpdateUser(userDTO);
+            return Ok();
+        }
 
     }
 }

@@ -13,6 +13,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models
         public double Price { get; set; }
         public bool Accepted { get; set; }
         public int DelivererId { get; set; }
+        public User Deliverer { get; set; }
         public string DelivererEmail { get; set; }
         public DateTime TimePosted { get; set; }
         public DateTime? TimeAccepted { get; set; }
