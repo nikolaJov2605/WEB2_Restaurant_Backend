@@ -90,6 +90,36 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             }
         }
 
+        public async Task<List<OrderDTO>> GetAvailableOrders()
+        {
+            List<Order> orders = await _dbContext.Orders.Where(x => x.Accepted == false).ToListAsync();
+            List<OrderDTO> retList = new List<OrderDTO>();
+            foreach(var order in orders)
+            {
+                List<FoodOrder> temp = _dbContext.FoodOrder.Include(x => x.Food).Where(x => x.Order.Id == order.Id).ToList();
+                OrderDTO orderDto = _mapper.Map<OrderDTO>(order);
+                orderDto.OrderedFood = new List<FoodDTO>();
+                foreach (var fo in temp)
+                {
+                    FoodDTO foodDTO = new FoodDTO();
+                    Food food = _dbContext.Food.FirstOrDefault(x => x.Id == fo.Food.Id);
+                    if (food == null)
+                        break;
+                    foodDTO = _mapper.Map<FoodDTO>(food);
+                    foodDTO.Ingredients = new List<IngredientDTO>();
+                    string[] strArr = fo.Ingredients.Split(", ");
+                    foreach (var s in strArr)
+                    {
+                        foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
+                    }
+                    foodDTO.Amount = fo.FoodAmount;
+                    orderDto.OrderedFood.Add(foodDTO);
+                }
+                retList.Add(orderDto);
+            }
+            return retList;
+        }
+
         public async Task<List<OrderDTO>> GetOrdersForUser(string email)
         {
             List<Order> orders = await _dbContext.Orders.Where(x => x.UserEmail == email).ToListAsync();
@@ -150,6 +180,41 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             }
 
             return retList;
+        }
+
+        public async Task<OrderDTO> TakeOrder(OrderTakeDTO data)
+        {
+            Order order = await _dbContext.Orders.SingleOrDefaultAsync(x => x.Id == data.OrderId);
+            if(order == null)
+                return null;
+            if (order.Accepted == true)
+                return null;
+            
+            User deliverer = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == data.DelivererEmail);
+
+            order.Deliverer = deliverer;
+            order.DelivererEmail = deliverer.Email;
+            order.TimeAccepted = DateTime.Now;
+
+            Random r = new Random();
+            order.TimeDelivered = order.TimeAccepted?.AddMinutes(r.Next(15, 60));
+            order.Accepted = true;
+            try
+            {
+                _dbContext.SaveChanges();
+            }
+            catch(DbUpdateConcurrencyException ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Order allready being taken
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return _mapper.Map<OrderDTO>(order);
+            
         }
     }
 }

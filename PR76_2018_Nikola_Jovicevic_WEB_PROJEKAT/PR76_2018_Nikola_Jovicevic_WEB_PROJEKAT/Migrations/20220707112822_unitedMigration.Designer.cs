@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration;
 
 namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    partial class RestaurantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220707112822_unitedMigration")]
+    partial class unitedMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,7 +96,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                         .UseIdentityColumn();
 
                     b.Property<bool>("Accepted")
-                        .IsConcurrencyToken()
                         .HasColumnType("bit");
 
                     b.Property<string>("Address")
@@ -109,7 +110,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.Property<string>("DelivererEmail")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DelivererId")
+                    b.Property<int>("DelivererId")
                         .HasColumnType("int");
 
                     b.Property<double>("Price")
@@ -198,7 +199,9 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                 {
                     b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.User", "Deliverer")
                         .WithMany()
-                        .HasForeignKey("DelivererId");
+                        .HasForeignKey("DelivererId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Deliverer");
                 });

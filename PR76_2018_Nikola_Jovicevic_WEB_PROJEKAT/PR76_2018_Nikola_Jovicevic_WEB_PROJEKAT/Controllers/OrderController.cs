@@ -55,5 +55,26 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok(retOrders);
         }
 
+        [HttpGet("available-orders")]
+        [Authorize(Roles = "deliverer")]
+        public async Task<ActionResult> GetAvailableOrders()
+        {
+            List<OrderDTO> retOrders = await _orderService.GetAvailableOrders();
+            if(retOrders == null)
+            {
+                return NotFound();
+            }
+            return Ok(retOrders);
+        }
+
+        [HttpPost("take-order")]
+        [Authorize(Roles = "deliverer")]
+        public async Task<IActionResult> TakeOrder([FromBody] OrderTakeDTO data)
+        {
+            //await _orderService.AnounceOrder(orderDto);
+            OrderDTO order = await _orderService.TakeOrder(data);
+            return Ok(order);
+        }
+
     }
 }

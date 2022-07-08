@@ -28,9 +28,9 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             _secretKey = config.GetSection("SecretKey");
         }
 
-        public async Task<UserDTO> GetUserByUsername(string username)
+        public async Task<UserDTO> GetUserByEmail(string email)
         {
-            User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.UserName == username);
+            User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email);
             return _mapper.Map<UserDTO>(user);
         }
 
@@ -96,7 +96,12 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             }
             User updatedUser = _mapper.Map<User>(userDTO);
             updatedUser.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
-            user = updatedUser;
+
+            user.UserName = updatedUser.UserName;
+            user.Name = updatedUser.Name;
+            user.LastName = updatedUser.LastName;
+            user.Address = updatedUser.LastName;
+
             await _dbContext.SaveChangesAsync();
         }
     }

@@ -7,7 +7,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Interfaces
     {
         Task<TokenDTO> Login(UserLoginDTO userLogin);
         Task Register(UserDTO userDTO);
-        Task<UserDTO> GetUserByUsername(string username);
+        Task<UserDTO> GetUserByEmail(string email);
         Task UpdateUser(UserDTO userDTO);
     }
 }

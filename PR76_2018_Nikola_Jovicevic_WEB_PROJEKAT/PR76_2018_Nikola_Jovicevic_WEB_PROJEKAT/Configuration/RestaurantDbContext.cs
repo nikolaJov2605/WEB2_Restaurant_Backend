@@ -25,6 +25,9 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration
             //Kazemo mu da pronadje sve konfiguracije u Assembliju i da ih primeni nad bazom
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(RestaurantDbContext).Assembly);
 
+            modelBuilder.Entity<Order>()
+                .Property(x => x.Accepted).IsConcurrencyToken();
+
         }
     }
 

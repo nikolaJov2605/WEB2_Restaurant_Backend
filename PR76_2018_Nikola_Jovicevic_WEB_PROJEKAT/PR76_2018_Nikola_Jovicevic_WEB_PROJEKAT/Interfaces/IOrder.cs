@@ -9,5 +9,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Interfaces
         Task AnounceOrder(OrderDTO order);
         Task<List<OrderDTO>> GetOrdersForUser(string email);
         Task<List<OrderDTO>> GetUndeliveredOrders(string email);
+        Task<List<OrderDTO>> GetAvailableOrders();
+        Task<OrderDTO> TakeOrder(OrderTakeDTO data);
     }
 }

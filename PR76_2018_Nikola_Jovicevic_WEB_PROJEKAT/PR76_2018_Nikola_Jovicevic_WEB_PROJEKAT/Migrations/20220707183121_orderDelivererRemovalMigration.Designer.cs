@@ -10,8 +10,8 @@ using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration;
 namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    [Migration("20220705202728_unitedMigration")]
-    partial class unitedMigration
+    [Migration("20220707183121_orderDelivererRemovalMigration")]
+    partial class orderDelivererRemovalMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -110,7 +110,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.Property<string>("DelivererEmail")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DelivererId")
+                    b.Property<int?>("DelivererId")
                         .HasColumnType("int");
 
                     b.Property<double>("Price")
@@ -129,6 +129,8 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DelivererId");
 
                     b.ToTable("Orders");
                 });
@@ -191,6 +193,15 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Migrations
                     b.Navigation("Food");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.Order", b =>
+                {
+                    b.HasOne("PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models.User", "Deliverer")
+                        .WithMany()
+                        .HasForeignKey("DelivererId");
+
+                    b.Navigation("Deliverer");
                 });
 #pragma warning restore 612, 618
         }

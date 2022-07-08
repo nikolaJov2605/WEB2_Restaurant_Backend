@@ -36,10 +36,10 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok(token);
         }
 
-        [HttpGet("{username}")]
-        public async Task<ActionResult> GetUserByUsername(string username)
+        [HttpGet("{email}")]
+        public async Task<ActionResult> GetUserByUsername(string email)
         {
-            UserDTO retUser = await _userService.GetUserByUsername(username);
+            UserDTO retUser = await _userService.GetUserByEmail(email);
             if(retUser == null)
             {
                 return NotFound();
