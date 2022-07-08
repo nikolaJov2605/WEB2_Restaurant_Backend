@@ -76,5 +76,52 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok(order);
         }
 
+        [HttpGet("taken-order/{email}")]
+        [Authorize(Roles = "deliverer")]
+        public async Task<ActionResult> GetTakenOrder(string email)
+        {
+            OrderDTO retOrder = await _orderService.GetTakenOrder(email);
+            if (retOrder == null)
+            {
+                return NotFound();
+            }
+            return Ok(retOrder);
+        }
+
+        [HttpGet("time-remaining/{deliveryId}")]
+        [Authorize(Roles = "deliverer, customer")]
+        public async Task<ActionResult> GetSecondsUntilDelivery(int deliveryId)
+        {
+            double? retVal = await _orderService.GetSecondsUntilDelivery(deliveryId);
+            if (retVal == null)
+            {
+                return NotFound();
+            }
+            return Ok(retVal);
+        }
+
+        [HttpPost("finish-delivery")]
+        [Authorize(Roles ="deliverer")]
+        public async Task<ActionResult> FinishDelivery(OrderDTO orderDto)
+        {
+            bool retVal = await _orderService.FinishDelivery(orderDto);
+            if (retVal != true)
+            {
+                return NotFound();
+            }
+            return Ok(retVal);
+        }
+
+        [HttpGet("my-deliveries/{email}")]
+        [Authorize(Roles = "deliverer")]
+        public async Task<ActionResult> GetMyDeliveries(string email)
+        {
+            List<OrderDTO> orders = await _orderService.GetMyDeliveries(email);
+            if(orders == null)
+            {
+                return NotFound();
+            }
+            return Ok(orders);
+        }
     }
 }

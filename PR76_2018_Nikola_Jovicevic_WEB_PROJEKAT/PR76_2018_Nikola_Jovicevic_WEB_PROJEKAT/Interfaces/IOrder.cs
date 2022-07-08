@@ -11,5 +11,9 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Interfaces
         Task<List<OrderDTO>> GetUndeliveredOrders(string email);
         Task<List<OrderDTO>> GetAvailableOrders();
         Task<OrderDTO> TakeOrder(OrderTakeDTO data);
+        Task<OrderDTO> GetTakenOrder(string email);
+        Task<double?> GetSecondsUntilDelivery(int deliveryId);
+        Task<bool> FinishDelivery(OrderDTO order);
+        Task<List<OrderDTO>> GetMyDeliveries(string email);
     }
 }

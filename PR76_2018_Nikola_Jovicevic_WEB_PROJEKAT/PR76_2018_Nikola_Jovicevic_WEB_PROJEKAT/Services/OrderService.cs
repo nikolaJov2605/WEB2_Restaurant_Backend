@@ -90,6 +90,24 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             }
         }
 
+        public async Task<bool> FinishDelivery(OrderDTO order)
+        {
+            Order orderDb = await _dbContext.Orders.SingleOrDefaultAsync(x => x.Id == order.Id);
+            orderDb.Delivered = true;
+            bool retVal = false;
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+                retVal = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return retVal;
+        }
+
         public async Task<List<OrderDTO>> GetAvailableOrders()
         {
             List<Order> orders = await _dbContext.Orders.Where(x => x.Accepted == false).ToListAsync();
@@ -117,6 +135,37 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 }
                 retList.Add(orderDto);
             }
+            return retList;
+        }
+
+        public async Task<List<OrderDTO>> GetMyDeliveries(string email)
+        {
+            List<Order> orders = await _dbContext.Orders.Where(x => x.DelivererEmail == email && x.Delivered == true).ToListAsync();
+            List<OrderDTO> retList = new List<OrderDTO>();
+            foreach (var order in orders)
+            {
+                List<FoodOrder> temp = _dbContext.FoodOrder.Include(x => x.Food).Where(x => x.Order.Id == order.Id).ToList();
+                OrderDTO orderDto = _mapper.Map<OrderDTO>(order);
+                orderDto.OrderedFood = new List<FoodDTO>();
+                foreach (var fo in temp)
+                {
+                    FoodDTO foodDTO = new FoodDTO();
+                    Food food = _dbContext.Food.FirstOrDefault(x => x.Id == fo.Food.Id);
+                    if (food == null)
+                        break;
+                    foodDTO = _mapper.Map<FoodDTO>(food);
+                    foodDTO.Ingredients = new List<IngredientDTO>();
+                    string[] strArr = fo.Ingredients.Split(", ");
+                    foreach (var s in strArr)
+                    {
+                        foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
+                    }
+                    foodDTO.Amount = fo.FoodAmount;
+                    orderDto.OrderedFood.Add(foodDTO);
+                }
+                retList.Add(orderDto);
+            }
+
             return retList;
         }
 
@@ -149,6 +198,42 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             }
 
             return retList;
+        }
+
+        public async Task<double?> GetSecondsUntilDelivery(int deliveryId)
+        {
+            Order order = await _dbContext.Orders.SingleOrDefaultAsync(x => x.Id == deliveryId);
+            double? diffInSeconds = order.TimeDelivered.HasValue ? (double?)(order.TimeDelivered.Value - DateTime.Now).TotalSeconds : null;
+            return diffInSeconds;
+        }
+
+        public async Task<OrderDTO> GetTakenOrder(string email)
+        {
+            Order order = await _dbContext.Orders.SingleOrDefaultAsync(x => x.DelivererEmail == email && x.Accepted == true && x.Delivered == false);
+
+            List<FoodOrder> temp = _dbContext.FoodOrder.Include(x => x.Food).Where(x => x.Order.Id == order.Id).ToList();
+
+            OrderDTO orderDto = _mapper.Map<OrderDTO>(order);
+            orderDto.OrderedFood = new List<FoodDTO>();
+            foreach (var fo in temp)
+            {
+                FoodDTO foodDTO = new FoodDTO();
+                Food food = _dbContext.Food.FirstOrDefault(x => x.Id == fo.Food.Id);
+                if (food == null)
+                    break;
+                foodDTO = _mapper.Map<FoodDTO>(food);
+                foodDTO.Ingredients = new List<IngredientDTO>();
+                string[] strArr = fo.Ingredients.Split(", ");
+                foreach (var s in strArr)
+                {
+                    foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
+                }
+                foodDTO.Amount = fo.FoodAmount;
+                orderDto.OrderedFood.Add(foodDTO);
+            }
+            //retList.Add(orderDto);
+            return orderDto;
+
         }
 
         public async Task<List<OrderDTO>> GetUndeliveredOrders(string email)
@@ -189,6 +274,13 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 return null;
             if (order.Accepted == true)
                 return null;
+
+            // proveri da li postojji narudzbina koju je trenutni dostavljac zapoceo a nije zavrsio, i ako postoji, odbij mu prihvatanje sledece
+            Order activeOrder = await _dbContext.Orders.SingleOrDefaultAsync(x => x.DelivererEmail == data.DelivererEmail && x.Accepted == true && x.Delivered == false);
+            if (activeOrder != null)
+            {
+                return null;
+            }
             
             User deliverer = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == data.DelivererEmail);
 
