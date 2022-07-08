@@ -31,6 +31,18 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok();
         }
 
+        [HttpGet("get-all")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            List<OrderDTO> retOrders = await _orderService.GetAllOrders();
+            if(retOrders == null)
+            {
+                return NotFound();
+            }
+            return Ok(retOrders);
+        }
+
         [HttpGet("{email}")]
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> GetOrdersForUser(string email)
@@ -45,14 +57,14 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
 
         [HttpGet("current-orders/{email}")]
         [Authorize(Roles = "customer")]
-        public async Task<ActionResult> GetUndeliveredOrders(string email)
+        public async Task<ActionResult> GetUndeliveredOrder(string email)
         {
-            List<OrderDTO> retOrders = await _orderService.GetUndeliveredOrders(email);
-            if(retOrders == null)
+            OrderDTO retOrder = await _orderService.GetUndeliveredOrder(email);
+            if(retOrder == null)
             {
                 return NotFound();
             }
-            return Ok(retOrders);
+            return Ok(retOrder);
         }
 
         [HttpGet("available-orders")]

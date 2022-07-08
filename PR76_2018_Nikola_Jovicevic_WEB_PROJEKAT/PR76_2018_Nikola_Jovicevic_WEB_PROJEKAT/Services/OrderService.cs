@@ -18,6 +18,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
         private readonly IConfigurationSection _deliveryFee;
         private readonly IMapper _mapper;
         private readonly RestaurantDbContext _dbContext;
+        private Random _random;
 
         public OrderService(IMapper mapper, RestaurantDbContext dbContext, IConfiguration config)
         {
@@ -25,6 +26,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             _dbContext = dbContext;
             _secretKey = config.GetSection("SecretKey");
             _deliveryFee = config.GetSection("DeliveryFee");
+            _random = new Random();
         }
         public async Task AnounceOrder(OrderDTO orderDto)
         {
@@ -106,6 +108,36 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             }
 
             return retVal;
+        }
+
+        public async Task<List<OrderDTO>> GetAllOrders()
+        {
+            List<Order> orders = await _dbContext.Orders.ToListAsync();
+            List<OrderDTO> retList = new List<OrderDTO>();
+            foreach (var order in orders)
+            {
+                List<FoodOrder> temp = _dbContext.FoodOrder.Include(x => x.Food).Where(x => x.Order.Id == order.Id).ToList();
+                OrderDTO orderDto = _mapper.Map<OrderDTO>(order);
+                orderDto.OrderedFood = new List<FoodDTO>();
+                foreach (var fo in temp)
+                {
+                    FoodDTO foodDTO = new FoodDTO();
+                    Food food = _dbContext.Food.FirstOrDefault(x => x.Id == fo.Food.Id);
+                    if (food == null)
+                        break;
+                    foodDTO = _mapper.Map<FoodDTO>(food);
+                    foodDTO.Ingredients = new List<IngredientDTO>();
+                    string[] strArr = fo.Ingredients.Split(", ");
+                    foreach (var s in strArr)
+                    {
+                        foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
+                    }
+                    foodDTO.Amount = fo.FoodAmount;
+                    orderDto.OrderedFood.Add(foodDTO);
+                }
+                retList.Add(orderDto);
+            }
+            return retList;
         }
 
         public async Task<List<OrderDTO>> GetAvailableOrders()
@@ -209,7 +241,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
 
         public async Task<OrderDTO> GetTakenOrder(string email)
         {
-            Order order = await _dbContext.Orders.SingleOrDefaultAsync(x => x.DelivererEmail == email && x.Accepted == true && x.Delivered == false);
+            Order order = await _dbContext.Orders.SingleOrDefaultAsync(x => x.DelivererEmail == email && x.Accepted == true && x.TimeDelivered > DateTime.Now);
 
             List<FoodOrder> temp = _dbContext.FoodOrder.Include(x => x.Food).Where(x => x.Order.Id == order.Id).ToList();
 
@@ -236,35 +268,32 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
 
         }
 
-        public async Task<List<OrderDTO>> GetUndeliveredOrders(string email)
+        public async Task<OrderDTO> GetUndeliveredOrder(string email)
         {
-            List<Order> orders = await _dbContext.Orders.Where(x => x.UserEmail == email && x.Delivered == false).ToListAsync();
+            Order order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.UserEmail == email && x.TimeDelivered > DateTime.Now);
             List<OrderDTO> retList = new List<OrderDTO>();
-            foreach (var order in orders)
+            
+            List<FoodOrder> temp = _dbContext.FoodOrder.Include(x => x.Food).Where(x => x.Order.Id == order.Id).ToList();
+            OrderDTO orderDto = _mapper.Map<OrderDTO>(order);
+            orderDto.OrderedFood = new List<FoodDTO>();
+            foreach (var fo in temp)
             {
-                List<FoodOrder> temp = _dbContext.FoodOrder.Include(x => x.Food).Where(x => x.Order.Id == order.Id).ToList();
-                OrderDTO orderDto = _mapper.Map<OrderDTO>(order);
-                orderDto.OrderedFood = new List<FoodDTO>();
-                foreach (var fo in temp)
+                FoodDTO foodDTO = new FoodDTO();
+                Food food = _dbContext.Food.FirstOrDefault(x => x.Id == fo.Food.Id);
+                if (food == null)
+                    break;
+                foodDTO = _mapper.Map<FoodDTO>(food);
+                foodDTO.Ingredients = new List<IngredientDTO>();
+                string[] strArr = fo.Ingredients.Split(", ");
+                foreach (var s in strArr)
                 {
-                    FoodDTO foodDTO = new FoodDTO();
-                    Food food = _dbContext.Food.FirstOrDefault(x => x.Id == fo.Food.Id);
-                    if (food == null)
-                        break;
-                    foodDTO = _mapper.Map<FoodDTO>(food);
-                    foodDTO.Ingredients = new List<IngredientDTO>();
-                    string[] strArr = fo.Ingredients.Split(", ");
-                    foreach (var s in strArr)
-                    {
-                        foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
-                    }
-                    foodDTO.Amount = fo.FoodAmount;
-                    orderDto.OrderedFood.Add(foodDTO);
+                    foodDTO.Ingredients.Add(new IngredientDTO { Name = s });
                 }
-                retList.Add(orderDto);
+                foodDTO.Amount = fo.FoodAmount;
+                orderDto.OrderedFood.Add(foodDTO);
             }
 
-            return retList;
+            return orderDto;
         }
 
         public async Task<OrderDTO> TakeOrder(OrderTakeDTO data)
@@ -276,7 +305,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 return null;
 
             // proveri da li postojji narudzbina koju je trenutni dostavljac zapoceo a nije zavrsio, i ako postoji, odbij mu prihvatanje sledece
-            Order activeOrder = await _dbContext.Orders.SingleOrDefaultAsync(x => x.DelivererEmail == data.DelivererEmail && x.Accepted == true && x.Delivered == false);
+            Order activeOrder = await _dbContext.Orders.SingleOrDefaultAsync(x => x.DelivererEmail == data.DelivererEmail && x.Accepted == true && x.TimeDelivered > DateTime.Now);
             if (activeOrder != null)
             {
                 return null;
@@ -288,9 +317,9 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             order.DelivererEmail = deliverer.Email;
             order.TimeAccepted = DateTime.Now;
 
-            Random r = new Random();
-            order.TimeDelivered = order.TimeAccepted?.AddMinutes(r.Next(15, 60));
+            order.TimeDelivered = order.TimeAccepted?.AddMinutes(_random.Next(1, 3));
             order.Accepted = true;
+            order.Delivered = true;
             try
             {
                 _dbContext.SaveChanges();

@@ -7,8 +7,9 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Interfaces
     public interface IOrder
     {
         Task AnounceOrder(OrderDTO order);
+        Task<List<OrderDTO>> GetAllOrders();
         Task<List<OrderDTO>> GetOrdersForUser(string email);
-        Task<List<OrderDTO>> GetUndeliveredOrders(string email);
+        Task<OrderDTO> GetUndeliveredOrder(string email);
         Task<List<OrderDTO>> GetAvailableOrders();
         Task<OrderDTO> TakeOrder(OrderTakeDTO data);
         Task<OrderDTO> GetTakenOrder(string email);
