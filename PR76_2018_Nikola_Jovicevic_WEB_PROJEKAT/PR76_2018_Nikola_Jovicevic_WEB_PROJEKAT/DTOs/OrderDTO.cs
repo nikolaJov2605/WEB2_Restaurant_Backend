@@ -7,6 +7,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.DTOs
     {
         public int Id { get; set; }
         public string UserEmail { get; set; }
+        public string DelivererEmail { get; set; }
         public string Comment { get; set; }
         public string Address { get; set; }
         public bool Accepted { get; set; }

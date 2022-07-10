@@ -12,6 +12,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.DTOs
         public string Address { get; set; }
         public string UserType { get; set; }
         public bool Verified { get; set; }
+        public bool Denied { get; set; }
         public DateTime BirthDate { get; set; }
     }
 }

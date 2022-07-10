@@ -9,6 +9,7 @@ using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,9 +29,47 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             _secretKey = config.GetSection("SecretKey");
         }
 
+        public async Task<bool> DenyDeliverer(VerificationDTO verification)
+        {
+            User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.UserName == verification.Username);
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.Denied = true;
+            user.Verified = false;
+
+            try
+            {
+                _dbContext.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<List<UserDTO>> GetAllDeliverers()
+        {
+            List<User> allDeliverers = await _dbContext.Users.Where(x => x.UserType == "deliverer").ToListAsync();
+            if (allDeliverers == null)
+            {
+                return null;
+            }
+            List<UserDTO> retList = _mapper.Map<List<UserDTO>>(allDeliverers);
+            return retList;
+        }
+
         public async Task<UserDTO> GetUserByEmail(string email)
         {
             User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email);
+            if (user == null)
+            {
+                return null;
+            }
             return _mapper.Map<UserDTO>(user);
         }
 
@@ -87,6 +126,28 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<bool> UnverifyDeliverer(VerificationDTO verification)
+        {
+            User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.UserName == verification.Username);
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.Verified = false;
+
+            try
+            {
+                _dbContext.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
         public async Task UpdateUser(UserDTO userDTO)
         {
             User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == userDTO.Email);
@@ -95,7 +156,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 return;
             }
             User updatedUser = _mapper.Map<User>(userDTO);
-            updatedUser.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
 
             user.UserName = updatedUser.UserName;
             user.Name = updatedUser.Name;
@@ -103,6 +163,30 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             user.Address = updatedUser.LastName;
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<bool> VerifyDeliverer(VerificationDTO verification)
+        {
+            User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.UserName == verification.Username);
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.Verified = true;
+            user.Denied = false;
+            
+            try
+            {
+                _dbContext.SaveChanges();
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+
         }
     }
 }

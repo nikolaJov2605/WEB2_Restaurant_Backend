@@ -30,5 +30,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models
         public DateTime BirthDate { get; set; }
         public string UserType { get; set; }
         public bool Verified { get; set; }
+        public bool Denied { get; set; }
     }
 }

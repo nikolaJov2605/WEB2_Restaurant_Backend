@@ -55,7 +55,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok(retOrders);
         }
 
-        [HttpGet("current-orders/{email}")]
+        [HttpGet("current-order/{email}")]
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> GetUndeliveredOrder(string email)
         {
