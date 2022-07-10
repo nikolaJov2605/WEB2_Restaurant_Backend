@@ -14,10 +14,12 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUser _userService;
+        private readonly IMail _mailService;
 
-        public UserController(IUser userService)
+        public UserController(IUser userService, IMail mailService)
         {
             this._userService = userService;
+            this._mailService = mailService;
         }
 
         [HttpGet("all-deliverers")]
@@ -80,6 +82,13 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
                 return NotFound();
             }
 
+            string userEmail = await _userService.GetUsersEmail(verification.Username);
+            if (string.IsNullOrEmpty(userEmail))
+                return NotFound();
+
+            _mailService.SendVerificationMail(userEmail, "approved");
+
+
             return Ok(retVal);
         }
 
@@ -93,6 +102,12 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
                 return NotFound();
             }
 
+            string userEmail = await _userService.GetUsersEmail(verification.Username);
+            if (string.IsNullOrEmpty(userEmail))
+                return NotFound();
+
+            _mailService.SendVerificationMail(userEmail, "unverified");
+
             return Ok(retVal);
         }
 
@@ -105,6 +120,12 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             {
                 return NotFound();
             }
+
+            string userEmail = await _userService.GetUsersEmail(verification.Username);
+            if (string.IsNullOrEmpty(userEmail))
+                return NotFound();
+
+            _mailService.SendVerificationMail(userEmail, "denied");
 
             return Ok(retVal);
         }

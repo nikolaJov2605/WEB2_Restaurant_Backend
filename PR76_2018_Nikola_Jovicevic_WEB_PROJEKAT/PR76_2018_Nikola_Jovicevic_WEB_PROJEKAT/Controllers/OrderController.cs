@@ -31,6 +31,15 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok();
         }
 
+        [HttpGet("delivery-fee")]
+        [Authorize(Roles = "customer")]
+        public async Task<IActionResult> GetDeliveryFee()
+        {
+            double retVal = await _orderService.GetDeliveryFee();
+
+            return Ok(retVal);
+        }
+
         [HttpGet("get-all")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAllOrders()

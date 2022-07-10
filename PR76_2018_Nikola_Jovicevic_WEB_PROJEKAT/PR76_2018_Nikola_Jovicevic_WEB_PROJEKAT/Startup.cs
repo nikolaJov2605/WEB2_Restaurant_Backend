@@ -102,6 +102,10 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT
                 });
             });
 
+            //--EmailConfig--\\
+            EmailConfiguration emailConfiguration = Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+            services.AddSingleton(emailConfiguration);
+
             //--DbContext--\\
             services.AddDbContext<RestaurantDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("RestaurantDb")));
             var mapperConfig = new MapperConfiguration(mc =>
@@ -116,6 +120,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT
             services.AddScoped<IUser, UserService>();
             services.AddScoped<IFood, FoodService>();
             services.AddScoped<IOrder, OrderService>();
+            services.AddScoped<IMail, MailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

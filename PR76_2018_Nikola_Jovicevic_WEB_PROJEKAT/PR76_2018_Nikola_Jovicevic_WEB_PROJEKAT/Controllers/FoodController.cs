@@ -21,8 +21,26 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             _foodService = foodService;
         }
 
+        [HttpPost("add-food")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult> AddFood([FromBody] FoodUploadDTO food)
+        {
+            bool retVal = await _foodService.AddFood(food);
+
+            return Ok(retVal);
+        }
+
+        [HttpPost("add-ingredient")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult> AddIngredient([FromBody] IngredientDTO ingredient)
+        {
+            bool retVal = await _foodService.AddIngredient(ingredient);
+
+            return Ok(retVal);
+        }
+
         [HttpGet("all")]
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = "admin, customer")]
         public async Task<ActionResult> GetAllFood()
         {
             List<FoodDTO> allFood = await _foodService.GetAllFood();
@@ -38,7 +56,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
         }
 
         [HttpGet("ingredients")]
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = "admin, customer")]
         public async Task<ActionResult> GetAllIngredients()
         {
             List<IngredientDTO> allIngredients = await _foodService.GetAllIngredients();

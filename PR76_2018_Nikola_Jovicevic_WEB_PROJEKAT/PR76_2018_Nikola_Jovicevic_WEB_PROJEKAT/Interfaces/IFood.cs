@@ -6,6 +6,8 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Interfaces
 {
     public interface IFood
     {
+        Task<bool> AddFood(FoodUploadDTO food);
+        Task<bool> AddIngredient(IngredientDTO ingredient);
         Task<FoodDTO> GetFood(int id);
         Task<List<FoodDTO>> GetAllFood();
         Task<List<IngredientDTO>> GetAllIngredients();

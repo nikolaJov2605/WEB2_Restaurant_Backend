@@ -73,6 +73,13 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             return _mapper.Map<UserDTO>(user);
         }
 
+        public async Task<string> GetUsersEmail(string username)
+        {
+            User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.UserName == username); ;
+
+            return user.Email;
+        }
+
         public async Task<TokenDTO> Login(UserLoginDTO userLogin)
         {
             User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == userLogin.Email);

@@ -26,6 +26,52 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
 
         }
 
+        public async Task<bool> AddFood(FoodUploadDTO food)
+        {
+            Food foodCheck = await _dbContext.Food.SingleOrDefaultAsync(x => x.Name == food.Name && x.Quantity == food.Quantity && x.UnitOfMeasure == food.UnitOfMeasure);
+            if(foodCheck != null)
+            {
+                return false;
+            }
+
+            Food toUpload = _mapper.Map<Food>(food);
+
+            try
+            {
+                await _dbContext.Food.AddAsync(toUpload);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> AddIngredient(IngredientDTO ingredient)
+        {
+            Ingredient ingredientCheck = await _dbContext.Ingredients.SingleOrDefaultAsync(x => x.Name == ingredient.Name);
+            if(ingredientCheck != null)
+            {
+                return false;
+            }
+
+            Ingredient toAdd = _mapper.Map<Ingredient>(ingredient);
+
+            try
+            {
+                await _dbContext.Ingredients.AddAsync(toAdd);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
         public async Task<List<FoodDTO>> GetAllFood()
         {
             try

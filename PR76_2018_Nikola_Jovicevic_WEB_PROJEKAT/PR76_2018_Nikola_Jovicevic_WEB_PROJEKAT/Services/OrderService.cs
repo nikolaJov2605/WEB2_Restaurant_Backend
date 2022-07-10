@@ -187,6 +187,11 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             return retList;
         }
 
+        public async Task<double> GetDeliveryFee()
+        {
+            return double.Parse(_deliveryFee.Value);
+        }
+
         public async Task<List<OrderDTO>> GetMyDeliveries(string email)
         {
             List<Order> orders = await _dbContext.Orders.Where(x => x.DelivererEmail == email && x.Delivered == true).ToListAsync();
