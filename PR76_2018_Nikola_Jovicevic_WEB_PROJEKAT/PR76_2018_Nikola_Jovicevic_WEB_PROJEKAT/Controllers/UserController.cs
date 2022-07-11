@@ -35,7 +35,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserDTO userDTO)
+        public async Task<IActionResult> Register([FromForm] UserDTO userDTO)
         {
             await _userService.Register(userDTO);
             return Ok();

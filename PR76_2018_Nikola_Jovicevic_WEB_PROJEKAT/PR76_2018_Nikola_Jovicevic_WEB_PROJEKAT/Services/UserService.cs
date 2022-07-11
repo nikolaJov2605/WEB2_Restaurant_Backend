@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +10,8 @@ using PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -22,11 +25,15 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
         private readonly IMapper _mapper;
         private readonly RestaurantDbContext _dbContext;
 
+        private static string dataPath;
+
         public UserService(IMapper mapper, RestaurantDbContext dbContext, IConfiguration config)
         {
             _mapper = mapper;
             _dbContext = dbContext;
             _secretKey = config.GetSection("SecretKey");
+
+            dataPath = Directory.GetParent(Directory.GetCurrentDirectory()).FullName + "\\PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT\\Data\\";
         }
 
         public async Task<bool> DenyDeliverer(VerificationDTO verification)
@@ -63,14 +70,62 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             return retList;
         }
 
-        public async Task<UserDTO> GetUserByEmail(string email)
+        public async Task<UserDTO> GetUserByEmail(string email)// ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooovdeeeeeeeeeeee radimo
         {
             User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email);
             if (user == null)
             {
                 return null;
             }
-            return _mapper.Map<UserDTO>(user);
+
+
+            string imagesFilePath = dataPath + "UserImages\\";
+            string defaultImageFilePath = imagesFilePath + "default-profile-picture.png";
+
+            UserDTO retUser = _mapper.Map<UserDTO>(user);
+
+            string filePath = user.ImageFilePath;
+            string userFolder = Path.GetDirectoryName(filePath);
+
+            if(Directory.Exists(userFolder))
+            {
+                if(File.Exists(filePath))
+                {
+
+                    /*Stream fileStream = IFormFile.OpenReadStream();
+                    FileStream file = new FileStream(filePath, FileMode.Open);
+                    if(file.Length > 0)
+                    {
+                        retUser.Image = (Microsoft.AspNetCore.Http.IFormFile)file;
+                    }*/
+                    using (Stream fileStream = new FileStream(filePath, FileMode.Open))
+                    {
+                        string fileName = Path.GetFileName(filePath);
+                        IFormFile file = new FormFile(fileStream, 0, fileStream.Length, fileName, filePath)
+                        {
+                            Headers = new HeaderDictionary(),
+                            ContentType = "application/json"
+                        };
+                        retUser.Image = file;
+                        //await fileStream.CopyToAsync((Stream)retUser.Image);
+                        //await userDTO.Image.CopyToAsync(fileStream);
+                    }
+                }
+            }
+            /*else
+            {
+                string imageFilePath = userFolder + "\\" + user.ImageFilePath;
+                if (File.Exists(defaultImageFilePath))
+                {
+                    using (Stream fileStream = new FileStream(imageFilePath, FileMode.Open))
+                    {
+                        await fileStream.CopyToAsync((Stream)retUser.Image);
+                        //await userDTO.Image.CopyToAsync(fileStream);
+                    }
+                }
+            }*/
+
+            return retUser;
         }
 
         public async Task<string> GetUsersEmail(string username)
@@ -127,7 +182,34 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 return;
             }
 
+
             User userToAdd = _mapper.Map<User>(userDTO);
+
+            string imagesFilePath = dataPath + "UserImages\\";
+            if (userDTO.Image == null)
+            {
+                imagesFilePath += "default-profile-picture.png";
+                userToAdd.ImageFilePath = imagesFilePath;
+            }
+            else
+            {
+                string newFolderPath = imagesFilePath + userDTO.Email;
+                if(!Directory.Exists(newFolderPath))
+                {
+                    Directory.CreateDirectory(newFolderPath);
+
+                    if (userDTO.Image.Length > 0)
+                    {
+                        string filePath = Path.Combine(newFolderPath, userDTO.Image.FileName);
+                        using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await userDTO.Image.CopyToAsync(fileStream);
+                        }
+                        userToAdd.ImageFilePath = filePath;
+                    }
+                }
+            }
+
             userToAdd.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
             _dbContext.Users.Add(userToAdd);
             await _dbContext.SaveChangesAsync();

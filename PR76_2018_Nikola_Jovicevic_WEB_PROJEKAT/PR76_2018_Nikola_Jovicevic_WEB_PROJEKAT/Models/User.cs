@@ -31,5 +31,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Models
         public string UserType { get; set; }
         public bool Verified { get; set; }
         public bool Denied { get; set; }
+        public string ImageFilePath { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
+using System;
 
 namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.DTOs
 {
@@ -14,5 +16,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.DTOs
         public bool Verified { get; set; }
         public bool Denied { get; set; }
         public DateTime BirthDate { get; set; }
+        public IFormFile Image { get; set; }
     }
 }
