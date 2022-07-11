@@ -70,7 +70,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             return retList;
         }
 
-        public async Task<UserDTO> GetUserByEmail(string email)// ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooovdeeeeeeeeeeee radimo
+        public async Task<UserDTO> GetUserByEmail(string email)
         {
             User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email);
             if (user == null)
@@ -79,10 +79,11 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             }
 
 
-            string imagesFilePath = dataPath + "UserImages\\";
-            string defaultImageFilePath = imagesFilePath + "default-profile-picture.png";
-
             UserDTO retUser = _mapper.Map<UserDTO>(user);
+
+            string imagesFilePath = dataPath + "UserImages\\";
+            string defaultImageFilePath = imagesFilePath + "default-profile-picture.jpg";
+
 
             string filePath = user.ImageFilePath;
             string userFolder = Path.GetDirectoryName(filePath);
@@ -91,13 +92,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             {
                 if(File.Exists(filePath))
                 {
-
-                    /*Stream fileStream = IFormFile.OpenReadStream();
-                    FileStream file = new FileStream(filePath, FileMode.Open);
-                    if(file.Length > 0)
-                    {
-                        retUser.Image = (Microsoft.AspNetCore.Http.IFormFile)file;
-                    }*/
                     using (Stream fileStream = new FileStream(filePath, FileMode.Open))
                     {
                         string fileName = Path.GetFileName(filePath);
@@ -107,23 +101,9 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                             ContentType = "application/json"
                         };
                         retUser.Image = file;
-                        //await fileStream.CopyToAsync((Stream)retUser.Image);
-                        //await userDTO.Image.CopyToAsync(fileStream);
                     }
                 }
             }
-            /*else
-            {
-                string imageFilePath = userFolder + "\\" + user.ImageFilePath;
-                if (File.Exists(defaultImageFilePath))
-                {
-                    using (Stream fileStream = new FileStream(imageFilePath, FileMode.Open))
-                    {
-                        await fileStream.CopyToAsync((Stream)retUser.Image);
-                        //await userDTO.Image.CopyToAsync(fileStream);
-                    }
-                }
-            }*/
 
             return retUser;
         }
@@ -188,7 +168,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             string imagesFilePath = dataPath + "UserImages\\";
             if (userDTO.Image == null)
             {
-                imagesFilePath += "default-profile-picture.png";
+                imagesFilePath += "default-profile-picture.jpg";
                 userToAdd.ImageFilePath = imagesFilePath;
             }
             else
@@ -237,7 +217,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             }
         }
 
-        public async Task UpdateUser(UserDTO userDTO)
+        public async Task UpdateUser(UserDTO userDTO)// ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooovdeeeeeeeeeeee radimo
         {
             User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == userDTO.Email);
             if (user == null)
@@ -250,6 +230,48 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             user.Name = updatedUser.Name;
             user.LastName = updatedUser.LastName;
             user.Address = updatedUser.LastName;
+
+            string imagesFilePath = dataPath + "UserImages\\";
+            if(userDTO.Image != null)
+            {
+                if (string.IsNullOrEmpty(user.ImageFilePath))
+                {
+                    imagesFilePath += "default-profile-picture.jpg";
+                    user.ImageFilePath = imagesFilePath;
+                }
+                else
+                {
+                    string newFolderPath = imagesFilePath + userDTO.Email;
+                    if (!Directory.Exists(newFolderPath))
+                    {
+                        Directory.CreateDirectory(newFolderPath);
+
+                        if (userDTO.Image.Length > 0)
+                        {
+                            string filePath = Path.Combine(newFolderPath, userDTO.Image.FileName);
+                            using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await userDTO.Image.CopyToAsync(fileStream);
+                            }
+                            user.ImageFilePath = filePath;
+                        }
+                    }
+                    else
+                    {
+                        if (userDTO.Image.Length > 0)
+                        {
+                            File.Delete(user.ImageFilePath);
+                            string filePath = Path.Combine(newFolderPath, userDTO.Image.FileName);
+                            using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await userDTO.Image.CopyToAsync(fileStream);
+                            }
+                            user.ImageFilePath = filePath;
+                        }
+                    }
+                }
+            }
+            
 
             await _dbContext.SaveChangesAsync();
         }
@@ -276,6 +298,34 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 return false;
             }
 
+        }
+
+        public async Task<byte[]> GetUserImage(string email)
+        {
+            User user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email);
+            if (user == null)
+            {
+                return null;
+            }
+
+            byte[] retArray = { };
+
+            string imagesFilePath = dataPath + "UserImages\\";
+            string defaultImageFilePath = imagesFilePath + "default-profile-picture.jpg";
+
+
+            string filePath = user.ImageFilePath;
+            string userFolder = Path.GetDirectoryName(filePath);
+
+            if (Directory.Exists(userFolder))
+            {
+                if (File.Exists(filePath))
+                {
+                    retArray = File.ReadAllBytes(filePath);
+                }
+            }
+
+            return retArray;
         }
     }
 }

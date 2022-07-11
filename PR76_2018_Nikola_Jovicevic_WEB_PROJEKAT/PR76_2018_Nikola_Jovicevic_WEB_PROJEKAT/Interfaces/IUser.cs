@@ -15,5 +15,6 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Interfaces
         Task<bool> UnverifyDeliverer(VerificationDTO verification);
         Task<bool> DenyDeliverer(VerificationDTO verification);
         Task<string> GetUsersEmail(string username);
+        Task<byte[]> GetUserImage(string email);
     }
 }

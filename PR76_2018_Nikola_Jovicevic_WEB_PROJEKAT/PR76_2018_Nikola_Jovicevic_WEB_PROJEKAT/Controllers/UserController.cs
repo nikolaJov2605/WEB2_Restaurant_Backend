@@ -66,7 +66,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
 
         [HttpPost("update-user")]
         [Authorize(Roles ="admin, deliverer, customer")]
-        public async Task<IActionResult> UpdateUser([FromBody] UserDTO userDTO)
+        public async Task<IActionResult> UpdateUser([FromForm] UserDTO userDTO)
         {
             await _userService.UpdateUser(userDTO);
             return Ok();
@@ -130,6 +130,17 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             return Ok(retVal);
         }
 
-
+        [HttpGet("image/{email}")]
+        [Authorize(Roles = "admin, deliverer, customer")]
+        public async Task<ActionResult> GetUserImage(string email)
+        {
+            byte[] retArray = await _userService.GetUserImage(email);
+            //UserDTO retUser = await _userService.GetUserByEmail(email);
+            if (retArray == null)
+            {
+                return NotFound();
+            }
+            return Ok(retArray);
+        }
     }
 }
