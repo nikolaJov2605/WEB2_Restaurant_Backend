@@ -28,12 +28,12 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
             _deliveryFee = config.GetSection("DeliveryFee");
             _random = new Random();
         }
-        public async Task AnounceOrder(OrderDTO orderDto)
+        public async Task<bool> AnounceOrder(OrderDTO orderDto)
         {
             Order checkOrder = await _dbContext.Orders.FirstOrDefaultAsync(x => x.UserEmail == orderDto.UserEmail && (x.TimeDelivered == null || x.TimeDelivered > DateTime.Now));
             if (checkOrder != null)
             {
-                return;
+                return false;
             }
             Order order = _mapper.Map<Order>(orderDto);
 
@@ -48,7 +48,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 var foodQuery = _dbContext.Food.SingleOrDefault(x => x.Name == food.Name && x.Quantity == food.Quantity);
                 if(foodQuery == null)
                 {
-                    return;
+                    return false;
                  //   foodQuery.Ingredients = new List<Ingredient>();
                 }
 
@@ -90,6 +90,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 _dbContext.Orders.Add(order);
                 _dbContext.FoodOrder.AddRange(toAdd);
                 await _dbContext.SaveChangesAsync();
+                return true;
             }
             catch (Exception e)
             {

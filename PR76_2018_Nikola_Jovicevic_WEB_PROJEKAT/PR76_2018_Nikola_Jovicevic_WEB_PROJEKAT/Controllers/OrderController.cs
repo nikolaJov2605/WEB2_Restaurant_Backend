@@ -27,7 +27,11 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
         [Authorize(Roles = "customer")]
         public async Task<IActionResult> AnounceOrder([FromBody] OrderDTO orderDto)
         {
-            await _orderService.AnounceOrder(orderDto);
+            bool retVal = await _orderService.AnounceOrder(orderDto);
+            if(retVal == false)
+            {
+                return BadRequest();
+            }
             return Ok();
         }
 
@@ -94,6 +98,10 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
         {
             //await _orderService.AnounceOrder(orderDto);
             OrderDTO order = await _orderService.TakeOrder(data);
+            if(order == null)
+            {
+                return BadRequest();
+            }
             return Ok(order);
         }
 
@@ -128,7 +136,7 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Controllers
             bool retVal = await _orderService.FinishDelivery(orderDto);
             if (retVal != true)
             {
-                return NotFound();
+                return BadRequest();
             }
             return Ok(retVal);
         }
