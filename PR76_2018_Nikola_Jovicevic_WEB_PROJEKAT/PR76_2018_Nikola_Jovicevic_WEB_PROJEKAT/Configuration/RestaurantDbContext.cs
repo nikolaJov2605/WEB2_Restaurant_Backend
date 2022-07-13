@@ -27,6 +27,8 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Configuration
 
             modelBuilder.Entity<Order>()
                 .Property(x => x.Accepted).IsConcurrencyToken();
+            modelBuilder.Entity<User>()
+                .Property(x => x.Verified).IsConcurrencyToken();
 
         }
     }

@@ -52,6 +52,12 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 _dbContext.SaveChanges();
                 return true;
             }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+                // User verification allready being modified
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
@@ -210,6 +216,12 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
                 _dbContext.SaveChanges();
                 return true;
             }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+                // User verification allready being modified
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
@@ -286,13 +298,19 @@ namespace PR76_2018_Nikola_Jovicevic_WEB_PROJEKAT.Services
 
             user.Verified = true;
             user.Denied = false;
-            
+
             try
             {
                 _dbContext.SaveChanges();
                 return true;
             }
-            catch(Exception ex)
+            catch (DbUpdateConcurrencyException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+                // User verification allready being modified
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return false;
